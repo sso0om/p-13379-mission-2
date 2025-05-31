@@ -42,8 +42,7 @@ public class Calc {
         while (hasNextToken && matcher.group().equals("*")) {
             String operator = matcher.group();
             nextToken();
-            int nextNumber = Integer.parseInt(matcher.group());
-            nextToken();
+            int nextNumber = parseNumberParentheses();
 
             result = switch (operator) {
                 case "*" -> result * nextNumber;
@@ -55,6 +54,12 @@ public class Calc {
 
     private static int parseNumberParentheses() {
         int result;
+        boolean isNegative = false;
+
+        if (hasNextToken && matcher.group().equals("-")) {
+            isNegative = true;
+            nextToken();
+        }
 
         if (hasNextToken && matcher.group().matches("-?\\d+")) {
             result = Integer.parseInt(matcher.group());
@@ -70,7 +75,7 @@ public class Calc {
         } else {
             throw new IllegalStateException("유효하지 않은 수식");
         }
-        return result;
+        return isNegative ? -result : result;
     }
 
     private static void nextToken() {
