@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Calc {
-    private static final Pattern pattern = Pattern.compile("-?\\d+|[+\\-*]");
+    private static final Pattern pattern = Pattern.compile("-?\\d+|[+\\-*()]");
     private static Matcher matcher;
     private static boolean hasNextToken;
 
@@ -37,8 +37,21 @@ public class Calc {
     }
 
     private static int parseMul() {
-        int result = Integer.parseInt(matcher.group());
-        nextToken();
+        int result;
+        if (hasNextToken && matcher.group().matches("-?\\d+")) {
+            result = Integer.parseInt(matcher.group());
+            nextToken();
+        } else if (hasNextToken && matcher.group().equals("(")) {
+            nextToken();
+            result = parseAddSub();
+
+            if (!hasNextToken || !matcher.group().equals(")")) {
+                throw new IllegalStateException("닫는 괄호 ')' 미입력");
+            }
+            nextToken();
+        } else {
+            throw new IllegalStateException("유효하지 않은 수식");
+        }
 
         while (hasNextToken && matcher.group().equals("*")) {
             String operator = matcher.group();
