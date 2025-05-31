@@ -37,7 +37,25 @@ public class Calc {
     }
 
     private static int parseMul() {
+        int result = parseNumberParentheses();
+
+        while (hasNextToken && matcher.group().equals("*")) {
+            String operator = matcher.group();
+            nextToken();
+            int nextNumber = Integer.parseInt(matcher.group());
+            nextToken();
+
+            result = switch (operator) {
+                case "*" -> result * nextNumber;
+                default -> throw new IllegalStateException("유효하지 않은 연산자 : " + operator);
+            };
+        }
+        return result;
+    }
+
+    private static int parseNumberParentheses() {
         int result;
+
         if (hasNextToken && matcher.group().matches("-?\\d+")) {
             result = Integer.parseInt(matcher.group());
             nextToken();
@@ -51,18 +69,6 @@ public class Calc {
             nextToken();
         } else {
             throw new IllegalStateException("유효하지 않은 수식");
-        }
-
-        while (hasNextToken && matcher.group().equals("*")) {
-            String operator = matcher.group();
-            nextToken();
-            int nextNumber = Integer.parseInt(matcher.group());
-            nextToken();
-
-            result = switch (operator) {
-                case "*" -> result * nextNumber;
-                default -> throw new IllegalStateException("유효하지 않은 연산자 : " + operator);
-            };
         }
         return result;
     }
