@@ -4,29 +4,57 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Calc {
-    public static int run(String exp) {
-        Pattern pattern = Pattern.compile("-?\\d+|[+\\-*]");
-        Matcher matcher = pattern.matcher(exp);
+    private static final Pattern pattern = Pattern.compile("-?\\d+|[+\\-*]");
+    private static Matcher matcher;
+    private static boolean hasNextToken;
 
-        int result;
-        if (matcher.find()) {
-            result = Integer.parseInt(matcher.group());
-        } else {
+    public static int run(String exp) {
+        matcher = pattern.matcher(exp);
+
+        nextToken();
+        if (!hasNextToken) {
             throw new IllegalStateException("수식 미입력");
         }
 
-        while (matcher.find()) {
+        return parseAddSub();
+    }
+
+    private static int parseAddSub() {
+        int result = parseMul();
+
+        while (hasNextToken && matcher.group().matches("[+-]")) {
             String operator = matcher.group();
-            matcher.find();
-            int nextNumber = Integer.parseInt(matcher.group());
+            nextToken();
+            int nextNumber = parseMul();
 
             result = switch (operator) {
                 case "+" -> result + nextNumber;
                 case "-" -> result - nextNumber;
+                default -> throw new IllegalStateException("유효하지 않은 연산자 : " + operator);
+            };
+        }
+        return result;
+    }
+
+    private static int parseMul() {
+        int result = Integer.parseInt(matcher.group());
+        nextToken();
+
+        while (hasNextToken && matcher.group().equals("*")) {
+            String operator = matcher.group();
+            nextToken();
+            int nextNumber = Integer.parseInt(matcher.group());
+            nextToken();
+
+            result = switch (operator) {
                 case "*" -> result * nextNumber;
                 default -> throw new IllegalStateException("유효하지 않은 연산자 : " + operator);
             };
         }
         return result;
+    }
+
+    private static void nextToken() {
+        hasNextToken = matcher.find();
     }
 }
