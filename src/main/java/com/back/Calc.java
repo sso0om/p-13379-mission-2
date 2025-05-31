@@ -22,7 +22,7 @@ public class Calc {
     private static int parseAddSub() {
         int result = parseMul();
 
-        while (hasNextToken && matcher.group().matches("[+-]")) {
+        while (isOperator("+") || isOperator("-")) {
             String operator = matcher.group();
             nextToken();
             int nextNumber = parseMul();
@@ -39,7 +39,7 @@ public class Calc {
     private static int parseMul() {
         int result = parseNumberParentheses();
 
-        while (hasNextToken && matcher.group().equals("*")) {
+        while (isOperator("*")) {
             String operator = matcher.group();
             nextToken();
             int nextNumber = parseNumberParentheses();
@@ -56,19 +56,19 @@ public class Calc {
         int result;
         boolean isNegative = false;
 
-        if (hasNextToken && matcher.group().equals("-")) {
+        if (isOperator("-")) {
             isNegative = true;
             nextToken();
         }
 
-        if (hasNextToken && matcher.group().matches("-?\\d+")) {
+        if (isNumber()) {
             result = Integer.parseInt(matcher.group());
             nextToken();
-        } else if (hasNextToken && matcher.group().equals("(")) {
+        } else if (isOperator("(")) {
             nextToken();
             result = parseAddSub();
 
-            if (!hasNextToken || !matcher.group().equals(")")) {
+            if (!hasNextToken || !isOperator(")")) {
                 throw new IllegalStateException("닫는 괄호 ')' 미입력");
             }
             nextToken();
@@ -80,5 +80,13 @@ public class Calc {
 
     private static void nextToken() {
         hasNextToken = matcher.find();
+    }
+
+    private static boolean isNumber() {
+        return hasNextToken && matcher.group().matches("-?\\d+");
+    }
+
+    private static boolean isOperator(String operator) {
+        return hasNextToken && matcher.group().equals(operator);
     }
 }
